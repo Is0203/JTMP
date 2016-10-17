@@ -1,25 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.UI;
-using System.Web.UI.WebControls;
-using System.Web.Security;
-using System.Web.Services;
-using System.Data.SqlClient;
-using System.Data;
-
-public partial class webs_charts : System.Web.UI.Page
-{
-    protected void Page_Load(object sender, EventArgs e)
-    {
-
-    }
-    public void Button1_Click(object sender, EventArgs e)
-    {
-        FormsAuthentication.SignOut();
-        Response.Redirect("home.aspx");
-    }
 
     [WebMethod]
     public static List<ChartDetails> GetDataonload()
@@ -95,74 +73,10 @@ WHERE poolname='C3'";
         }
         dr2.Close();
         sqlConn.Close();
-
-
-
-
-
         return dataList;
 
     }
-
-    //此方法用於呼叫出所有測量魚重紀錄
-    [WebMethod]
-    public static List<ChartValues> GetChartValues()
-    {
-
-        /*
-        資料庫變數宣告
-        */
-        string strConn = "Data Source=140.127.22.24,1433;Network Library = DBMSSOCN; Initial Catalog =Aquaculture;User ID = water1; Password = water;";
-        SqlConnection sqlConn = new SqlConnection(strConn);
-        String strSQL = @"SELECT batch.currentpool_id, pool.poolname, measuring.totalweight, measuring.loss,measuring.measurementdate,measuring.mantissa
-                          FROM batch INNER JOIN
-                          pool ON batch.currentpool_id = pool.id INNER JOIN
-                          measuring ON batch.id = measuring.batch_id
-                          WHERE poolname='C3'";
-        SqlDataReader dr = null;
-        SqlCommand command = new SqlCommand(strSQL, sqlConn);
-        /*
-        欲傳送之資料陣列宣告
-        */
-        List<ChartValues> dataList = new List<ChartValues>();
-        sqlConn.Open();
-        dr = command.ExecuteReader();
-        /*
-        控制變數宣告
-        */
-        DateTime dt_tempdate = new DateTime(2013, 11, 16);
-        float flo_tempvalue = 0;
-
-
-
-        while (dr.Read())
-        {
-
-
-            //補足沒資料的天數
-           
-            while (dt_tempdate <= new DateTime(int.Parse(dr["measurementdate"].ToString().Substring(0, 4)), int.Parse(dr["measurementdate"].ToString().Substring(4, 2)), int.Parse(dr["measurementdate"].ToString().Substring(6, 2))))
-            {
-                ChartValues mdetails = new ChartValues();
-                mdetails.date = dt_tempdate.ToString("yyyy-MM-ddTHH:mm:ss");
-                mdetails.value = flo_tempvalue;
-                dataList.Add(mdetails);
-                dt_tempdate = dt_tempdate.AddHours(24);
-            }
-            ChartValues details = new ChartValues();
-            details.date = new DateTime(int.Parse(dr["measurementdate"].ToString().Substring(0, 4)), int.Parse(dr["measurementdate"].ToString().Substring(4, 2)), int.Parse(dr["measurementdate"].ToString().Substring(6, 2))).ToString("yyyy-MM-ddTHH:mm:ss");
-            details.value = float.Parse(dr["totalweight"].ToString())/float.Parse(dr["mantissa"].ToString());
-            dataList.Add(details);
-            dt_tempdate = new DateTime(int.Parse(dr["measurementdate"].ToString().Substring(0, 4)), int.Parse(dr["measurementdate"].ToString().Substring(4, 2)), int.Parse(dr["measurementdate"].ToString().Substring(6, 2)));
-            flo_tempvalue =float.Parse(dr["totalweight"].ToString())/float.Parse(dr["mantissa"].ToString());
-
-
-
-        }
-        sqlConn.Close();
-        return dataList;
-    }
-
+  
     public class ChartDetails
     {
         public string date { get; set; }
@@ -184,11 +98,5 @@ WHERE poolname='C3'";
     {
         public string date { get; set; }
         public float value { get; set; }
-    }
-
-    protected void ImageButton1_Click(object sender, ImageClickEventArgs e)
-    {
-        ImageButton imgbtn = (ImageButton)sender;
-        Response.Redirect("charts" + imgbtn.TabIndex + ".aspx");
     }
 }
